@@ -87,6 +87,13 @@ proc recive_body*(u:var U):bool=
 # raw send
     
 proc raw_send_str(u:var U, to_send:string):bool=
+    try:
+        var bit= new_string(1)
+        if u.con.recv(bit, 1, 1)==0:
+            return true
+    except TimeoutError:
+        discard
+        
     while true:
         try:
             u.con.send(to_send)

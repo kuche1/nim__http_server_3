@@ -38,12 +38,16 @@ proc on_connection(u:var U)=
     #if u.send_html("response.html"): return
     #echo "HTML response sent"
 
+    #[
     let dir= u.url[1 .. ^1]
     if file_exists(dir):
         if u.send_download( dir, dir ): return
     
     else:
         if u.send_str("File not found: " & dir): return
+    ]#
+    
+    if u.send_download("ts.mp4", "ts.mp4"): return
 
 
 
