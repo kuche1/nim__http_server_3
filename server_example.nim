@@ -48,6 +48,7 @@ proc on_connection(u:var U)=
     ]#
     
     if u.send_download("ts.mp4", "ts.mp4"): return
+    echo "FILE SENT"
 
 
 

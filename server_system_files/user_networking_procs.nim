@@ -89,8 +89,12 @@ proc recive_body*(u:var U):bool=
 proc raw_send_str(u:var U, to_send:string):bool=
     try:
         var bit= new_string(1)
-        if u.con.recv(bit, 1, 1)==0:
+        case u.con.recv(bit, 1, 1)
+        of -1, 0:
             return true
+        else:
+            echo "UNEXPECTED RESULT OF RECV"
+            quit(1)
     except TimeoutError:
         discard
         
@@ -98,6 +102,7 @@ proc raw_send_str(u:var U, to_send:string):bool=
         try:
             u.con.send(to_send)
         except OSError:
+            echo "OSERROR ",cpu_time()
             continue
         break
     
@@ -107,7 +112,6 @@ proc raw_send_file(u:var U, dir:string):bool=
     let f= open(dir)
     while true:
         let red_amount= f.read_chars(to_send, 0, buffer)
-        echo "SENT: ", red_amount
         if red_amount == 0:
             close(f)
             return
