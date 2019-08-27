@@ -3,6 +3,7 @@ import tables
 
 type U* =object
     con:Socket
+    header:string
     
     body:Table[string,string]
     head:Table[string,string]

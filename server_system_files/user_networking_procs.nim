@@ -1,7 +1,7 @@
 
 import strutils
 from times import cpu_time
-from net import recv, TimeoutError, try_send
+from net import recv, TimeoutError, send
 from cgi import decode_url
 
 
@@ -87,7 +87,12 @@ proc recive_body*(u:var U):bool=
 # raw send
     
 proc raw_send_str(u:var U, to_send:string):bool=
-    return not u.con.try_send(to_send)
+    while true:
+        try:
+            u.con.send(to_send)
+        except OSError:
+            continue
+        break
     
 proc raw_send_file(u:var U, dir:string):bool=
     let buffer= u.send_file_chunk
@@ -95,6 +100,7 @@ proc raw_send_file(u:var U, dir:string):bool=
     let f= open(dir)
     while true:
         let red_amount= f.read_chars(to_send, 0, buffer)
+        echo "SENT: ", red_amount
         if red_amount == 0:
             close(f)
             return
@@ -107,33 +113,41 @@ proc raw_send_file(u:var U, dir:string):bool=
     
 # http header
 
-proc http_content_disposition(u:var U, info:string):bool=
-    return u.raw_send_str("Content-disposition: " & info & '\n')
+proc http_content_disposition(u:var U, info:string)=
+    u.header.add "Content-disposition: " & info & '\n'
 
-proc http_content_type(u:var U, info:string):bool=
-    return u.raw_send_str("Content-Type: " & info & '\n')
+proc http_content_type(u:var U, info:string)=
+    u.header.add "Content-Type: " & info & '\n'
     
 proc http_end(u:var U):bool=
-    return u.raw_send_str("\n")
+    u.header.add "\n"
+    result= u.raw_send_str( u.header )
+    u.header= ""
     
-proc http_ok(u:var U):bool=
-    return u.raw_send_str("HTTP/1.X 200 OK\n")
+proc http_ok(u:var U)=
+    u.header.add "HTTP/1.X 200 OK\n"
 
 #  actual send
 
 proc send_download*(u:var U, dir:string, name:string):bool=
-    if u.http_ok(): return true
-    if u.http_content_disposition("attachment; filename=\"" & name & '\"'): return true
+    u.http_ok()
+    u.http_content_disposition("attachment; filename=\"" & name & '\"')
     if u.http_end(): return true
     if u.raw_send_file(dir): return true
     
 proc send_file*(u:var U, dir:string):bool=
-    if u.http_ok(): return true
+    u.http_ok()
     if u.http_end(): return true
     if u.raw_send_file(dir): return true
 
 proc send_html*(u:var U, dir:string):bool=
-    if u.http_ok(): return true
-    if u.http_content_type("text/html"): return true
+    u.http_ok()
+    u.http_content_type("text/html")
     if u.http_end(): return true
     if u.raw_send_file(dir): return true
+    
+proc send_str*(u:var U, to_send:string):bool=
+    u.http_ok()
+    if u.http_end(): return true
+    if u.raw_send_str(to_send): return true
+    

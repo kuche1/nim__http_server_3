@@ -28,6 +28,7 @@ proc handle_new_connections(s:ptr S, on_connection:proc(u:var U) )=
     var u= new_user(con, ip, s)
     on_connection(u)
     close( con )
+    echo "DISCONNECTED"
     
 
 proc start_server*(s:var S, on_connection:proc(u:var U) )=
