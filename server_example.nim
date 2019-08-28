@@ -8,16 +8,6 @@ import "server_system_files/nice_web_server"
 
 var s= new_server()
 
-s.forcefully_take_port= true
-s.listen= 5
-s.no_new_connection_delay= 300
-s.port= 80
-s.ssl= false
-
-
-
-
-
 
 
 proc on_connection(u:var U)=

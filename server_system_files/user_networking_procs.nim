@@ -3,6 +3,7 @@ import strutils
 from times import cpu_time
 from net import recv, TimeoutError, send
 from cgi import decode_url
+from os import sleep
 
 
 proc recive_header*(u:var U):bool=
@@ -103,6 +104,7 @@ proc raw_send_str(u:var U, to_send:string):bool=
             u.con.send(to_send)
         except OSError:
             echo "OSERROR ",cpu_time()
+            sleep( u.cant_send_delay )
             continue
         break
     
