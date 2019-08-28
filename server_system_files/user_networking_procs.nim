@@ -7,10 +7,12 @@ from os import sleep
 
 
 proc recive_header*(u:var U):bool=
-    let end_at= int(cpu_time()*1000) + u.time_to_recive_header
+    # let end_at= int(cpu_time()*1000) + u.time_to_recive_header
+    let end_at= cpu_time() + u.time_to_recive_header
     var recived:string
     while true:
-        let remains= end_at - int(cpu_time()*1000)
+        # let remains= end_at - int(cpu_time()*1000)
+        let remains= int( end_at - cpu_time() )*1000
         if remains <= 0:
             return true
         
@@ -52,10 +54,12 @@ proc recive_header*(u:var U):bool=
 
 
 proc recive_body*(u:var U):bool=
-    let end_at= int(cpu_time()*1000) + u.time_to_recive_body
+    # let end_at= int(cpu_time()*1000) + u.time_to_recive_body
+    let end_at= cpu_time() + u.time_to_recive_body
     var recived:string
     while true:
-        let remains= end_at - int(cpu_time()*1000)
+        # let remains= end_at - int(cpu_time()*1000)
+        let remains= int( end_at - cpu_time() )*1000
         if remains <= 0:
             echo "Time left"
             return true

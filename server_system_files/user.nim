@@ -16,8 +16,8 @@ type U* =object
     cant_send_delay:int
     header_maxlen:int
     send_file_chunk:int
-    time_to_recive_body:int
-    time_to_recive_header:int
+    time_to_recive_body:float
+    time_to_recive_header:float
     
 proc body*(u:var U):Table[string,string]= u.body
 proc head*(u:var U):Table[string,string]= u.head
@@ -33,11 +33,11 @@ proc new_user(con:Socket, ip:string, s:ptr S):U=
     
     result.ip= ip
     
-    result.body_maxlen= s.body_maxlen
-    result.header_maxlen= s.header_maxlen
-    result.send_file_chunk= s.send_file_chunk
-    result.time_to_recive_body= s.time_to_recive_body
-    result.time_to_recive_header= s.time_to_recive_header
+    result.body_maxlen= 2048
+    result.header_maxlen= 100
+    result.send_file_chunk= 2048
+    result.time_to_recive_body= 10.0
+    result.time_to_recive_header= 2.0
     
     dealloc( s )
 
