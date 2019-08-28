@@ -103,13 +103,20 @@ proc raw_send_str(u:var U, to_send:string):bool=
                 quit(1)
         except TimeoutError:
             discard
+            
+        let time_passed= cpu_time() - u.upload_started_at
+        if time_passed > u.client_download_headstart:
+            let download_speed= u.uploaded_bytes div uint(time_passed)
+            if download_speed < u.min_download_speed:
+                echo "TOO SLOW DOWNLOAD: ", download_speed
+                return true
     
         try:
             u.con.send(to_send)
         except OSError:
-            echo "OSERROR ",cpu_time()
             sleep( u.cant_send_delay )
             continue
+        u.uploaded_bytes.inc len(to_send)
         break
     
 proc raw_send_file(u:var U, dir:string):bool=
@@ -138,6 +145,7 @@ proc http_content_type(u:var U, info:string)=
     
 proc http_end(u:var U):bool=
     u.header.add "\n"
+    u.upload_started_at= cpu_time()
     result= u.raw_send_str( u.header )
     u.header= ""
     

@@ -1,17 +1,12 @@
 
-DONE
+LATEST DONE
 
-
-
-disconnect if client upload too slow
-
-check if connection was closed
-
-
-======================================
 
 
 disconnect if client download too slow
+
+======================================
+
 
 limit disk read speed
 

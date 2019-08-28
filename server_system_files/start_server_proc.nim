@@ -2,7 +2,7 @@
 from net import set_sock_opt, OptReuseAddr, bind_addr, Port, listen, get_fd, accept_addr, close
 from nativesockets import set_blocking
 from os import sleep
-from threadpool import nil
+from threadpool import spawn, sync
 
 
 proc handle_new_connections(s:ptr S, on_connection:proc(u:var U) )=
@@ -23,7 +23,7 @@ proc handle_new_connections(s:ptr S, on_connection:proc(u:var U) )=
                 return
         break
     
-    threadpool.spawn handle_new_connections(s, on_connection)
+    spawn handle_new_connections(s, on_connection)
     
     var u= new_user(con, ip, s)
     on_connection(u)
@@ -47,13 +47,13 @@ proc start_server*(s:var S, on_connection:proc(u:var U) )=
     s.sock.listen( s.listen )
     s.sock.get_fd().set_blocking(false)
     
-    threadpool.spawn handle_new_connections(s.addr, on_connection)
+    spawn handle_new_connections(s.addr, on_connection)
 
 proc request_server_to_stop*(s:var S)=
     s.running= false
 
 proc wait_for_server_to_stop*()=
-    threadpool.sync()
+    sync()
     
 proc stop_server*(s:var S)=
     request_server_to_stop(s)

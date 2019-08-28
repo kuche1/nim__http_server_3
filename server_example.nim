@@ -14,13 +14,13 @@ proc on_connection(u:var U)=
     echo "Conenction from: ", u.ip
 
     if u.recive_header(): return
-    echo "Meth: ", u.meth
+    #echo "Meth: ", u.meth
     echo "Url: ", u.url
-    echo "Proto: ", u.proto
-    echo "Head: ", u.head
+    #echo "Proto: ", u.proto
+    #echo "Head: ", u.head
 
     if u.recive_body(): return
-    echo "Body: ", u.body
+    #echo "Body: ", u.body
 
     #if u.send_download("response.txt", "downloaded file.txt"): return
     #echo "Response sent"

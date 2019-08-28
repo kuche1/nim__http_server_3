@@ -8,11 +8,11 @@ type S = object
     running:bool
     sock:Socket
 
-    cant_send_delay:int
-    forcefully_take_port:bool
-    listen:int32
-    no_new_connection_delay:int
-    port:int
+    cant_send_delay*:int
+    forcefully_take_port*:bool
+    listen*:int32
+    no_new_connection_delay*:int
+    port*:int
     
 
 
