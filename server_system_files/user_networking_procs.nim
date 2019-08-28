@@ -87,18 +87,18 @@ proc recive_body*(u:var U):bool=
 # raw send
     
 proc raw_send_str(u:var U, to_send:string):bool=
-    try:
-        var bit= new_string(1)
-        case u.con.recv(bit, 1, 1)
-        of -1, 0:
-            return true
-        else:
-            echo "UNEXPECTED RESULT OF RECV"
-            quit(1)
-    except TimeoutError:
-        discard
-        
     while true:
+        try:
+            var bit= new_string(1)
+            case u.con.recv(bit, 1, 1)
+            of -1, 0:
+                return true
+            else:
+                echo "UNEXPECTED RESULT OF RECV"
+                quit(1)
+        except TimeoutError:
+            discard
+    
         try:
             u.con.send(to_send)
         except OSError:

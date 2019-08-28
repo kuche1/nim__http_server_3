@@ -20,3 +20,11 @@ limit upload speed
 ? send HTML and file uplaod at once
 
 limit max threads
+
+
+implement headstart for client download
+
+da opravq datatypes dane sa samo int a da sa uint
+da napravq novi WANINGS
+
+da dobavq ssl
