@@ -1,18 +1,16 @@
 
 import strutils
-from times import cpu_time
+from times import epoch_time
 from net import recv, TimeoutError, send
 from cgi import decode_url
 from os import sleep
 
 
 proc recive_header*(u:var U):bool=
-    # let end_at= int(cpu_time()*1000) + u.time_to_recive_header
-    let end_at= cpu_time() + u.time_to_recive_header
+    let end_at= epoch_time() + u.time_to_recive_header
     var recived:string
     while true:
-        # let remains= end_at - int(cpu_time()*1000)
-        let remains= int( end_at - cpu_time() )*1000
+        let remains= int( end_at - epoch_time() )*1000
         if remains <= 0:
             return true
         
@@ -54,12 +52,10 @@ proc recive_header*(u:var U):bool=
 
 
 proc recive_body*(u:var U):bool=
-    # let end_at= int(cpu_time()*1000) + u.time_to_recive_body
-    let end_at= cpu_time() + u.time_to_recive_body
+    let end_at= epoch_time() + u.time_to_recive_body
     var recived:string
     while true:
-        # let remains= end_at - int(cpu_time()*1000)
-        let remains= int( end_at - cpu_time() )*1000
+        let remains= int( end_at - epoch_time() )*1000
         if remains <= 0:
             echo "Time left"
             return true
@@ -104,9 +100,9 @@ proc raw_send_str(u:var U, to_send:string):bool=
         except TimeoutError:
             discard
             
-        let time_passed= cpu_time() - u.upload_started_at
+        let time_passed= epoch_time() - u.upload_started_at
         if time_passed > u.client_download_headstart:
-            let download_speed= u.uploaded_bytes div uint(time_passed)
+            let download_speed= u.uploaded_bytes div int(time_passed)
             if download_speed < u.min_download_speed:
                 echo "TOO SLOW DOWNLOAD: ", download_speed
                 return true
@@ -145,7 +141,7 @@ proc http_content_type(u:var U, info:string)=
     
 proc http_end(u:var U):bool=
     u.header.add "\n"
-    u.upload_started_at= cpu_time()
+    u.upload_started_at= epoch_time()
     result= u.raw_send_str( u.header )
     u.header= ""
     

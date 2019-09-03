@@ -4,7 +4,7 @@ import tables
 type U* =object
     con:Socket
     header:string
-    uploaded_bytes:uint64
+    uploaded_bytes:int64
     upload_started_at:float
     
     body:Table[string,string]
@@ -18,7 +18,7 @@ type U* =object
     client_download_headstart*:float
     cant_send_delay*:int
     header_maxlen*:int
-    min_download_speed*:uint
+    min_download_speed*:int
     send_file_chunk*:int
     time_to_recive_body*:float
     time_to_recive_header*:float

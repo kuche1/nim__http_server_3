@@ -3,7 +3,7 @@ from net import set_sock_opt, OptReuseAddr, bind_addr, Port, listen, get_fd, acc
 from nativesockets import set_blocking
 from os import sleep
 from threadpool import spawn, sync
-
+from locks import acquire, release
 
 proc handle_new_connections(s:ptr S, on_connection:proc(u:var U) )=
     var con:Socket
@@ -13,8 +13,8 @@ proc handle_new_connections(s:ptr S, on_connection:proc(u:var U) )=
         try:
             s.sock.accept_addr(con, ip)
         except OSError:
+            sleep( s.no_new_connection_delay )
             if s.running:
-                sleep( s.no_new_connection_delay )
                 continue
             else:
                 echo "SHUTTING DOWN"
@@ -22,6 +22,11 @@ proc handle_new_connections(s:ptr S, on_connection:proc(u:var U) )=
                 dealloc( s )
                 return
         break
+        
+    acquire s.threads_lock
+    inc s.threads
+    echo "Threads: ", s.threads
+    release s.threads_lock
     
     spawn handle_new_connections(s, on_connection)
     
@@ -30,10 +35,13 @@ proc handle_new_connections(s:ptr S, on_connection:proc(u:var U) )=
     close( con )
     echo "DISCONNECTED"
     
+    acquire s.threads_lock
+    dec s.threads
+    echo "Threads: ", s.threads
+    release s.threads_lock
+    
 
 proc start_server*(s:var S, on_connection:proc(u:var U) )=
-    echo "Note: SSL doesnt work yet"
-
     if s.forcefully_take_port:
         s.sock.set_sock_opt(OptReuseAddr, true)
 
@@ -52,9 +60,10 @@ proc start_server*(s:var S, on_connection:proc(u:var U) )=
 proc request_server_to_stop*(s:var S)=
     s.running= false
 
-proc wait_for_server_to_stop*()=
+proc wait_for_server_to_stop*(s:var S)=
     sync()
+    dealloc_server s
     
 proc stop_server*(s:var S)=
     request_server_to_stop(s)
-    wait_for_server_to_stop()
+    wait_for_server_to_stop(s)
