@@ -84,28 +84,34 @@ proc recive_body*(u:var U):bool=
         else:
             u.body[ item[0 ..< ind]]= item[(ind+2) .. ^1]
 
+# upload checks
+
+proc check_if_user_has_disconnected(u:var U):bool=
+    try:
+        var bit= new_string(1)
+        case u.con.recv(bit, 1, 1)
+        of -1, 0:
+            return true
+        else:
+            echo "UNEXPECTED RESULT OF RECV"
+            quit(1)
+    except TimeoutError:
+        discard
+        
+proc check_if_upload_speed_too_low(u:var U):bool=
+    let time_passed= epoch_time() - u.upload_started_at
+    if time_passed > u.client_download_headstart:
+        let download_speed= u.uploaded_bytes div int(time_passed)
+        if download_speed < u.min_download_speed:
+            echo "TOO SLOW DOWNLOAD: ", download_speed
+            return true
 
 # raw send
     
 proc raw_send_str(u:var U, to_send:string):bool=
     while true:
-        try:
-            var bit= new_string(1)
-            case u.con.recv(bit, 1, 1)
-            of -1, 0:
-                return true
-            else:
-                echo "UNEXPECTED RESULT OF RECV"
-                quit(1)
-        except TimeoutError:
-            discard
-            
-        let time_passed= epoch_time() - u.upload_started_at
-        if time_passed > u.client_download_headstart:
-            let download_speed= u.uploaded_bytes div int(time_passed)
-            if download_speed < u.min_download_speed:
-                echo "TOO SLOW DOWNLOAD: ", download_speed
-                return true
+        if u.check_if_user_has_disconnected(): return true
+        if u.check_if_upload_speed_too_low(): return true
     
         try:
             u.con.send(to_send)
