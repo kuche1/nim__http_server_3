@@ -3,25 +3,19 @@ LATEST DONE
 
 
 
-disconnect if client download too slow
-*fixed the above
+limit upload speed
 
-implement headstart for client download
-
-threads being counted
+change min_download to min_upload
 
 ======================================
 
-
 limit disk read speed
-
-limit upload speed
 
 ? send HTML and file uplaod at once
 
 limit max threads
 
-da opravq datatypes dane sa samo int a da sa uint
-da napravq novi WANINGS
+? use uint instead of int
+? add warnings when changing settings
 
 da dobavq ssl
