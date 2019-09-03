@@ -40,6 +40,8 @@ proc handle_new_connections(s:ptr S, on_connection:proc(u:var U) )=
     echo "Threads: ", s.threads
     release s.threads_lock
     
+    dealloc_user u
+    
 
 proc start_server*(s:var S, on_connection:proc(u:var U) )=
     if s.forcefully_take_port:

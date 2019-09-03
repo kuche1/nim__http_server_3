@@ -4,7 +4,7 @@ from times import epoch_time
 from net import recv, TimeoutError, send
 from cgi import decode_url
 from os import sleep
-
+from math import ceil
 
 proc recive_header*(u:var U):bool=
     let end_at= epoch_time() + u.time_to_recive_header
@@ -102,7 +102,7 @@ proc check_if_upload_speed_too_low(u:var U):bool=
     let time_passed= epoch_time() - u.upload_started_at
     if time_passed > u.client_download_headstart:
         let download_speed= u.uploaded_bytes div int(time_passed)
-        if download_speed < u.min_download_speed:
+        if download_speed < u.min_upload_speed:
             echo "TOO SLOW DOWNLOAD: ", download_speed
             return true
 
@@ -119,6 +119,16 @@ proc raw_send_str(u:var U, to_send:string):bool=
             sleep( u.cant_send_delay )
             continue
         u.uploaded_bytes.inc len(to_send)
+        u.upload_since_last_piece.inc len(to_send)
+        
+        let max_upload= int(ceil(u.max_upload_speed / u.threads[]))
+        if u.upload_since_last_piece >= max_upload:
+            u.upload_since_last_piece -= max_upload
+            let difference= epoch_time() - u.last_piece_uploaded_at
+            if difference < 1:
+                sleep int(difference*1000)
+            u.last_piece_uploaded_at= epoch_time()
+            
         break
     
 proc raw_send_file(u:var U, dir:string):bool=
@@ -147,7 +157,9 @@ proc http_content_type(u:var U, info:string)=
     
 proc http_end(u:var U):bool=
     u.header.add "\n"
-    u.upload_started_at= epoch_time()
+    let now= epoch_time()
+    u.upload_started_at= now
+    u.last_piece_uploaded_at= now
     result= u.raw_send_str( u.header )
     u.header= ""
     

@@ -4,7 +4,10 @@ import tables
 type U* =object
     con:Socket
     header:string
+    last_piece_uploaded_at:float
+    threads:ptr int
     uploaded_bytes:int64
+    upload_since_last_piece:int
     upload_started_at:float
     
     body:Table[string,string]
@@ -18,7 +21,8 @@ type U* =object
     client_download_headstart*:float
     cant_send_delay*:int
     header_maxlen*:int
-    min_download_speed*:int
+    max_upload_speed*:int
+    min_upload_speed*:int
     send_file_chunk*:int
     time_to_recive_body*:float
     time_to_recive_header*:float
@@ -34,6 +38,7 @@ proc url*(u:var U):string= u.url
 proc new_user(con:Socket, ip:string, s:ptr S):U=
     result= U()
     result.con= con
+    result.threads= addr s.threads
     
     result.ip= ip
     
@@ -41,13 +46,15 @@ proc new_user(con:Socket, ip:string, s:ptr S):U=
     result.client_download_headstart= 5
     result.cant_send_delay= 50
     result.header_maxlen= 100
-    result.min_download_speed= 1024
+    result.max_upload_speed= 1024*1024
+    result.min_upload_speed= 1024
     result.send_file_chunk= 2048
     result.time_to_recive_body= 10.0
     result.time_to_recive_header= 2.0
     
-    dealloc( s )
+    dealloc s 
 
-
+proc dealloc_user(u:var U)=
+    u.threads= nil 
 
 include user_networking_procs
