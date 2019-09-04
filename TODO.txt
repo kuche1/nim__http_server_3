@@ -13,9 +13,9 @@ limit disk read speed
 
 ? send HTML and file uplaod at once
 
-limit max threads
+? limit max threads
 
 ? use uint instead of int
 ? add warnings when changing settings
 
-da dobavq ssl
+ssl
